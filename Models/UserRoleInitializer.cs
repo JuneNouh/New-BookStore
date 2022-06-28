@@ -5,40 +5,45 @@ using System.Threading.Tasks;
 
 namespace BookStore.Models
 {
-    public class UserRoleInitializer
+    public static class UserRoleInitializer
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<DefaultUser>>();
-            string[] roles = { "Admin", "User" };
-            IdentityResult roleresult;
 
-            foreach (var role in roles)
+            string[] roleNames = { "Admin", "User" };
+
+            IdentityResult roleResult;
+
+            foreach (var role in roleNames)
             {
-                var roleExist = await roleManager.RoleExistsAsync(role);
-                if (!roleExist)
+                var roleExists = await roleManager.RoleExistsAsync(role);
+
+                if (!roleExists)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    roleResult = await roleManager.CreateAsync(new IdentityRole(role));
                 }
             }
+
             var email = "admin@site.com";
-            var password = "Admin123!";
+            var password = "Qwerty123!";
+
             if (userManager.FindByEmailAsync(email).Result == null)
             {
                 DefaultUser user = new()
                 {
-
                     Email = email,
                     UserName = email,
                     FirstName = "Admin",
                     LastName = "Adminsson",
-                    Address = "Kalmar Street",
-                    City = "Kalmar",
-                    ZipCode = "39354",
+                    Address = "Adstreet 3",
+                    City = "Big City",
+                    ZipCode = "12345"
                 };
 
                 IdentityResult result = userManager.CreateAsync(user, password).Result;
+
                 if (result.Succeeded)
                 {
                     userManager.AddToRoleAsync(user, "Admin").Wait();
